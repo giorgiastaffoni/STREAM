@@ -1,6 +1,6 @@
-# STREAM
+# STREAM (Supporting Tool for Research with Environmental dna Approach of Metabarcoding)
 
-STREAM (Supporting Tool for Research with Environmental dna Approach of Metabarcoding) represents the workflow used in the following paper:
+STREAM represents the workflow used in the following paper:
 "Comparison of environmental DNA metabarcoding and electrofishing to assess freshwater fish biodiversity in northwestern Italy" (Ballini & Staffoni, submitted to Hydrobiologia)
 based on the datasets available at () and produced at the () group of the University of Florence. 
 
