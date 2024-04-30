@@ -1,4 +1,4 @@
-# Ballini & Staffoni 2024
+# STREAM
 
 This repo represents the workflow used in the following paper:
 "Comparison of environmental DNA metabarcoding and electrofishing to assess freshwater fish biodiversity in northwestern Italy" (Ballini & Staffoni, submitted to Hydrobiologia)
