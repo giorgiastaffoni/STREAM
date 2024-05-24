@@ -2,7 +2,7 @@
 
 This repo represents the workflow used in the following paper:
 "Comparison of environmental DNA metabarcoding and electrofishing in freshwater systems of northwestern Italy" (Ballini & Staffoni, submitted to Hydrobiologia)
-based on the datasets available at () and produced at the Molecular Ecology and Zoology group of the University of Florence. 
+based on the datasets available at the NCBI Short Read Archive (accession no. pending) and produced at the Molecular Ecology and Zoology group of the University of Florence. 
 
 The workflow was developed for the analysis of environmental DNA metabarcoding NGS data from Illumina platform. It performs step-by-step analysis of metabarcoding data using a custome reference database, created with CRABS software. It relies on Barque pipeline for data analysis, LULU filtering for error reduction and microDecon for decontamination. The goal of this repository is to simplify the coordinated use of these tools and make the analyses more reproducible.
 
@@ -14,7 +14,7 @@ The workflow was developed for the analysis of environmental DNA metabarcoding N
 6. Decontamination
 
 ## Introduction
-We used a multi-marker approach with Vert01 and Tele02 12S markers. 
+We used a multi-marker approach with Vert01 (Riaz et al., 2011) and Tele02 (Taberlet et al., 2018) 12S markers. The following workflow highlights the steps used during the analysis of the Vert01 dataset. We slightly changed parameters when working with Tele02, according to the marker's characteristics. 
 
 The following figure summarize the workflow:
 ![Image of the workflow]
@@ -27,6 +27,24 @@ Follow the instructions on the official documentation to install
 
 ## Reference database creation with CRABS
 For more details on CRABS, see the original documentation here https://github.com/gjeunen/reference_database_creator.
+
+```
+#NCBI database splitted download
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Actinopterygii"[Organism]' --output ncbi_actinopterygii_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Amphibia"[Organism]' --output ncbi_amphibia_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Cyclostomata"[Organism]' --output ncbi_cyclostomata_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Lepidosauria"[Organism]' --output ncbi_lepidosauria_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Archelosauria"[Organism]' --output ncbi_archelosauria_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Mammalia"[Organism]' --output ncbi_mammalia_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+
+#BOLD database download  - BOLD sequences containing gaps are by default discarded
+./crabs db_download --source bold --database 'Actinopterygii|Amphibia|Aves|Cephalaspidomorphi|Mammalia|Reptilia' --output bold_12svert.fasta --keep_original no --boldgap DISCARD --marker '12S'
+
+#Taxonomy file download
+./crabs db_download --source taxonomy
+```
+
+Reference databases created with CRABS must be converted into a Barque-friendly format (header: >Family_Genus_Species). We can do it at this point, using the idt2barque.py script. 
 
 ## eDNA metabarcoding analysis with Barque
 Before starting to use Barque, please read the official documentation here https://github.com/enormandeau/barque?tab=readme-ov-file#description.
