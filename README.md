@@ -24,24 +24,41 @@ Follow the instructions on the official documentation to install
 - Barque (https://github.com/enormandeau/barque)
 - LULU (https://github.com/tobiasgf/lulu)
 - microDecon (https://github.com/donaldtmcknight/microDecon)
+and their dependencies.
 
 ## Reference database creation with CRABS
 For more details on CRABS, see the original documentation here https://github.com/gjeunen/reference_database_creator.
 
-```
-#NCBI database splitted download
-./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Actinopterygii"[Organism]' --output ncbi_actinopterygii_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
-./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Amphibia"[Organism]' --output ncbi_amphibia_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
-./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Cyclostomata"[Organism]' --output ncbi_cyclostomata_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
-./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Lepidosauria"[Organism]' --output ncbi_lepidosauria_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
-./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Archelosauria"[Organism]' --output ncbi_archelosauria_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
-./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Mammalia"[Organism]' --output ncbi_mammalia_12svert.fasta --keep_original no --email giorgia.staffoni@unifi.it --batchsize 5000
+1. Database - vertebrate mitochondrial 12S rRNA sequences from NCBI and BOLD - and taxonomy download. 
 
-#BOLD database download  - BOLD sequences containing gaps are by default discarded
+```
+#NCBI database - splitted download
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Actinopterygii"[Organism]' --output ncbi_actinopterygii_12svert.fasta --keep_original no --email @user_email --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Amphibia"[Organism]' --output ncbi_amphibia_12svert.fasta --keep_original no --email @user_email --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Cyclostomata"[Organism]' --output ncbi_cyclostomata_12svert.fasta --keep_original no --email @user_email --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Lepidosauria"[Organism]' --output ncbi_lepidosauria_12svert.fasta --keep_original no --email @user_email --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Archelosauria"[Organism]' --output ncbi_archelosauria_12svert.fasta --keep_original no --email @user_email --batchsize 5000
+./crabs db_download --source ncbi --database nucleotide --query '12S[All Fields] OR "small subunit ribosomal RNA"[All Fields] AND "Mammalia"[Organism]' --output ncbi_mammalia_12svert.fasta --keep_original no --email @user_email --batchsize 5000
+
+#BOLD database  - BOLD sequences containing gaps are by default discarded
 ./crabs db_download --source bold --database 'Actinopterygii|Amphibia|Aves|Cephalaspidomorphi|Mammalia|Reptilia' --output bold_12svert.fasta --keep_original no --boldgap DISCARD --marker '12S'
 
-#Taxonomy file download
+#Taxonomy file
 ./crabs db_download --source taxonomy
+```
+
+2. Merge into one single database
+
+```
+#Merge the databases
+./crabs db_merge --output merged_db.fasta --uniq yes --input ncbi_actinopterygii_12svert.fasta ncbi_amphibia_12svert.fasta ncbi_cyclostomata_12svert.fasta ncbi_lepidosauria_12svert.fasta ncbi_archelosauria_12svert.fasta ncbi_mammalia_12svert.fasta bold_12svert.fasta
+```
+
+3. In silico pcr
+
+```
+#In silico pcr
+./crabs insilico_pcr --input merged_db.fasta --output 01-vert01_insilico-pcr.fasta --fwd TTAGATACCCCACTATGC --rev TAGAACAGGCTCCTCTAG --error 2
 ```
 
 Reference databases created with CRABS must be converted into a Barque-friendly format (header: >Family_Genus_Species). We can do it at this point, using the idt2barque.py script. 
