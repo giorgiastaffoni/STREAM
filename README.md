@@ -1,4 +1,4 @@
-# STREAM
+ # STREAM
 
 This repo represents the workflow used in the following paper:
 "Comparison of environmental DNA metabarcoding and electrofishing in freshwater systems of northwestern Italy" (Ballini & Staffoni, submitted to Hydrobiologia)
@@ -29,7 +29,7 @@ and their dependencies.
 ## Reference database creation with CRABS
 For more details on CRABS, see the original documentation here https://github.com/gjeunen/reference_database_creator.
 
-1. Database - vertebrate mitochondrial 12S rRNA sequences from NCBI and BOLD - and taxonomy download. 
+### 1. Database - vertebrate mitochondrial 12S rRNA sequences from NCBI and BOLD - and taxonomy download. 
 
 ```
 #NCBI database - splitted download
@@ -47,21 +47,63 @@ For more details on CRABS, see the original documentation here https://github.co
 ./crabs db_download --source taxonomy
 ```
 
-2. Merge into one single database
+### 2. Merging into one single database
 
 ```
-#Merge the databases
 ./crabs db_merge --output merged_db.fasta --uniq yes --input ncbi_actinopterygii_12svert.fasta ncbi_amphibia_12svert.fasta ncbi_cyclostomata_12svert.fasta ncbi_lepidosauria_12svert.fasta ncbi_archelosauria_12svert.fasta ncbi_mammalia_12svert.fasta bold_12svert.fasta
 ```
 
-3. In silico pcr
+### 3. In silico pcr
 
 ```
-#In silico pcr
 ./crabs insilico_pcr --input merged_db.fasta --output 01-vert01_insilico-pcr.fasta --fwd TTAGATACCCCACTATGC --rev TAGAACAGGCTCCTCTAG --error 2
 ```
 
-Reference databases created with CRABS must be converted into a Barque-friendly format (header: >Family_Genus_Species). We can do it at this point, using the idt2barque.py script. 
+<details>
+<summary> OverFlow Error: FASTA/FASTQ does not fit into buffer </summary>
+
+If the database download is not filtered by length and thus contains whole genome sequences, this error appears during in silico pcr. It is overcome by adding the buffer size parameter (see https://github.com/marcelm/cutadapt/issues/462) on lines 266 and 294 of the crabs original script. We applied ```--buffer-size=4000000000```.
+
+</details>
+
+A small % of large and out-of-target amplicons can be generated during the in silico pcr. Although probably containing our fragment of interest, these sequences have to be filtered out because they can introduce errors during the pga. We did it using the ```length-fultering.py``` script, as follows:
+```
+python3 length-filtering.py input --max_length 150
+```
+It will generate two files, one containing the discarded sequences and the second containing the accepted ones and used in the following steps. 
+
+### 4. Pairwise global alignment
+
+```
+./crabs pga --input merged_db.fasta --output 02-vert01_pga.fasta --database 01-vert01_insilico-pcr.fasta --fwd TTAGATACCCCACTATGC --rev TAGAACAGGCTCCTCTAG --speed medium --percid 0.90 --coverage 0.90 --filter_method strict
+```
+
+### 5. Taxonomy assignment
+
+```
+./crabs assign_tax --input 02-vert01_pga.fasta --output 03-vert01_taxonomy.tsv --acc2tax nucl_gb.accession2taxid --taxid nodes.dmp --name names.dmp --missing 03-vert01_missing_taxa.tsv
+```
+
+### 6. Database curation
+We removed records marked with "cf." or "aff." or "sp." - which are doubtful about the real taxonomy of the sequences - and curated hybrids records using the script ```dbrefinement_strict.py```.
+
+### 7. Dereplication
+```
+./crabs dereplicate --input 04-vert01_taxonomy-curated.tsv --output 05-vert01_dereplicated.tsv --method uniq_species
+```
+
+### 8. Cleanup
+```
+./crabs seq_cleanup --input 05-vert01_dereplicated.tsv --output 06-vert01_cleaned.tsv --minlen 30 --maxlen 150 --maxns 2 --enviro yes --species yes --nans 2
+```
+
+### 9. Fasta conversion
+```
+./crabs tax_format --input 06-vert01_cleaned.tsv --output 07-vert01_idt.fasta --format idt
+```
+
+### 10. Conversion into a barque-friendly fasta format
+Reference databases created with CRABS must be converted into a Barque-friendly format (header: >Family_Genus_Species). We can do it at this point, using the ```idt2barque.py``` script. 
 
 ## eDNA metabarcoding analysis with Barque
 Before starting to use Barque, please read the official documentation here https://github.com/enormandeau/barque?tab=readme-ov-file#description.
@@ -69,54 +111,18 @@ Before starting to use Barque, please read the official documentation here https
 #### Data requirement
 - Input Fastq files.
   The dataset used for this study contained forward and reverse reads from two 12S mitochondrial gene fragments of vertebrates and teleost species. Raw sequence reads were demultiplexed with bcl2fastq version 2.20 (Illumina) and FastQC was used to check read quality.
-- Reference database. Reference databases created with CRABS must be converted into a Barque-friendly format (header: >Family_Genus_Species).
+- Reference database converted into a Barque-friendly format
 
 To work with OTUs, two runs for each marker dataset must be performed. The first one is used to refine the database and generate denoised OTUs, along with their taxonomic assignment. In the second one, the OTUs and their taxonomic assignment are used as a database themselves to find read counts per sample.
 
-### Reference database conversion
-Transform the reference database to the Barque format
-
-```
-  import sys
-  import re
-
-  def clean_records(input_file, output_file):
-    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
-        for line in infile:
-            # Split the line into columns
-            columns = line.strip().split('\t')
-
-             # Step 1: Remove records with 'cf.' or 'aff.' in column 9
-            if 'cf.' in columns[8] or 'aff.' in columns[8]:
-                continue
-
-            # Step 2: Remove any character after 'sp.' in column 9
-            if 'sp.' in columns[8]:
-              columns[8] = columns[8].split('sp.')[0] + 'sp.'
-
-            # Step 3: If column 9 contains '_x_', substitute '_x_' with '-x-'
-            if '_x_' in columns[8]:
-                columns[8] = columns[8].replace('_x_', '-x-')
-
-            # Write the line on the new file
-            outfile.write('\t'.join(columns) + '\n')
-
-  if __name__ == "__main__":
-    # Check that two arguments have been provided from the command line
-    if len(sys.argv) != 3:
-        print("Error! The right usage is: python3 dbrefinement.py input_file output_file")
-        sys.exit(1)
-```
-
 ### Runs settings
-Download two Barque repositories, one for each run. We will call them "01_ASVs-OTUs_creation" and "02_OTUs_annotation". Then copy the reference database and the raw data into the 01_ASVs-OTUs_creation/03_database and 01_ASVs-OTUs_creation/04_data folders, respectively. All file names must end with .fastq.gz. 
+We downloaded two Barque repositories, one for each run, and called them "01_ASVs-OTUs_creation" and "02_OTUs_annotation". We then copied the reference database and the raw data into the 01_ASVs-OTUs_creation/03_database and 01_ASVs-OTUs_creation/04_data folders, respectively. 
 
-### Barque analysis
-Launch the first run using
-```
-./barque 02_info/barque_config.sh
-```
-To enhance accuracy in the taxonomic assignment and minimize erroneous sequence assignation, use the files stored in 01_ASVs-OTUs_creation/12_results to create a list of 'unwanted species', which can be non-target or non-present species in the study area. Specifically, you can use the files "marker_species_table" and "marker_multiple_hit_infos", and the sub-folder "01_multihits" to understand which 'unwanted species' resulted from the analysis. Copy their header into a txt file.
+### First run
+We launched the first run with the following parameters:
+
+
+To enhance accuracy in the taxonomic assignment and minimize erroneous sequence assignation, we then used the files stored in 01_ASVs-OTUs_creation/12_results to create a list of 'unwanted species' - non-target or non-present species in the study area. Specifically, we used the files "marker_species_table" and "marker_multiple_hit_infos", and the sub-folder "01_multihits" to understand which 'unwanted species' resulted from the analysis. Copy their header into a txt file named "unwanted_species.txt".
 
 Use your unwanted species list to refine the reference database, removing their sequences.
 
