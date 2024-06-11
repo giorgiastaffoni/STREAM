@@ -1,22 +1,23 @@
  # STREAM
 
-This repo represents the workflow used in the following paper:
-"Comparison of environmental DNA metabarcoding and electrofishing in freshwater systems of northwestern Italy" (Ballini & Staffoni, submitted to Hydrobiologia)
+This repo represents the workflow used in the following paper: <br />
+"Comparison of environmental DNA metabarcoding and electrofishing in freshwater systems of northwestern Italy" (Ballini & Staffoni, submitted to Hydrobiologia)<br />
 based on the datasets available at the NCBI Short Read Archive (accession no. pending) and produced at the Molecular Ecology and Zoology group of the University of Florence. 
 
 The workflow was developed for the analysis of environmental DNA metabarcoding NGS data from Illumina platform. It performs step-by-step analysis of metabarcoding data using a custome reference database, created with CRABS software. It relies on Barque pipeline for data analysis, LULU filtering for error reduction and microDecon for decontamination. The goal of this repository is to simplify the coordinated use of these tools and make the analyses more reproducible.
 
 ## Table of contents
-1. Introduction
-2. Reference database creation with CRABS
-3. eDNA metabarcoding analysis
-5. Error reduction
-6. Decontamination
+I. Introduction <br />
+II. Reference database creation with CRABS <br />
+III. eDNA metabarcoding analysis <br />
+IV. Error reduction <br />
+V. Decontamination <br />
+VI. Final curation <br />
 
-## Introduction
+## I. Introduction
 We used a multi-marker approach with Vert01 (Riaz et al., 2011) and Tele02 (Taberlet et al., 2018) 12S markers. The following workflow highlights the steps used during the analysis of the Vert01 dataset. We slightly changed parameters when working with Tele02, according to the marker's characteristics. 
 
-The following figure summarize the workflow:
+The following figure summarize the workflow:<br />
 ![Image of the workflow]
 
 Follow the instructions on the official documentation to install 
@@ -29,7 +30,7 @@ and their dependencies.
 ## Reference database creation with CRABS
 For more details on CRABS, see the original documentation here https://github.com/gjeunen/reference_database_creator.
 
-### 1. Database - vertebrate mitochondrial 12S rRNA sequences from NCBI and BOLD - and taxonomy download. 
+#### 1. Database - vertebrate mitochondrial 12S rRNA sequences from NCBI and BOLD - and taxonomy download. 
 
 ```
 #NCBI database - splitted download
@@ -47,13 +48,13 @@ For more details on CRABS, see the original documentation here https://github.co
 ./crabs db_download --source taxonomy
 ```
 
-### 2. Merging into one single database
+#### 2. Merging into one single database
 
 ```
 ./crabs db_merge --output merged_db.fasta --uniq yes --input ncbi_actinopterygii_12svert.fasta ncbi_amphibia_12svert.fasta ncbi_cyclostomata_12svert.fasta ncbi_lepidosauria_12svert.fasta ncbi_archelosauria_12svert.fasta ncbi_mammalia_12svert.fasta bold_12svert.fasta
 ```
 
-### 3. In silico pcr
+#### 3. In silico pcr
 
 ```
 ./crabs insilico_pcr --input merged_db.fasta --output 01-vert01_insilico-pcr.fasta --fwd TTAGATACCCCACTATGC --rev TAGAACAGGCTCCTCTAG --error 2
@@ -72,46 +73,46 @@ python3 length-filtering.py input_file --max_length 150
 ```
 It will generate two files, one containing the discarded sequences and the second containing the accepted ones and used in the following steps. 
 
-### 4. Pairwise global alignment
+#### 4. Pairwise global alignment
 
 ```
 ./crabs pga --input merged_db.fasta --output 02-vert01_pga.fasta --database 01-vert01_insilico-pcr.fasta --fwd TTAGATACCCCACTATGC --rev TAGAACAGGCTCCTCTAG --speed medium --percid 0.90 --coverage 0.90 --filter_method strict
 ```
 
-### 5. Taxonomy assignment
+#### 5. Taxonomy assignment
 
 ```
 ./crabs assign_tax --input 02-vert01_pga.fasta --output 03-vert01_taxonomy.tsv --acc2tax nucl_gb.accession2taxid --taxid nodes.dmp --name names.dmp --missing 03-vert01_missing_taxa.tsv
 ```
 
-### 6. Database curation
+#### 6. Database curation
 We removed records marked with "cf." or "aff." or "sp." - which are doubtful about the real taxonomy of the sequences - and curated hybrids records using the script ```dbrefinement_strict.py```.
 ```
 python3 dbrefinement_strict.py input_file output_file
 ```
 
-### 7. Dereplication
+#### 7. Dereplication
 ```
 ./crabs dereplicate --input 04-vert01_taxonomy-curated.tsv --output 05-vert01_dereplicated.tsv --method uniq_species
 ```
 
-### 8. Cleanup
+#### 8. Cleanup
 ```
 ./crabs seq_cleanup --input 05-vert01_dereplicated.tsv --output 06-vert01_cleaned.tsv --minlen 30 --maxlen 150 --maxns 2 --enviro yes --species yes --nans 2
 ```
 
-### 9. Fasta conversion
+#### 9. Fasta conversion
 ```
 ./crabs tax_format --input 06-vert01_cleaned.tsv --output 07-vert01_idt.fasta --format idt
 ```
 
-### 10. Conversion into a barque-friendly fasta format
+#### 10. Conversion into a barque-friendly fasta format
 Reference databases created with CRABS must be converted into a Barque-friendly format (header: >Family_Genus_Species). We used the ```idt2barque.py``` script. 
 ```
 python3 idt2barque.py input_file output_file
 ```
 
-## eDNA metabarcoding analysis with Barque
+## II. Barque analysis
 Before starting to use Barque, please read the official documentation here https://github.com/enormandeau/barque?tab=readme-ov-file#description.
 
 #### Data requirement
@@ -191,7 +192,7 @@ For the second run the 01_OTUs_creation/13_otu_database/vert01.otus.database.fas
 ### Most frequent non annotated sequences
 Sequences that are frequent in the samples but were not annotated by the pipeline can be checked on NCBI using blast. We only blasted sequences found more than 10 times. No target species were identified. 
 
-## Error reduction with LULU filtering
+## III. Error reduction with LULU filtering
 For more details on LULU, see the original documentation here https://github.com/tobiasgf/lulu.
 
 We used as
@@ -210,7 +211,7 @@ curated_result_mm87 <- lulu(otutab, matchlist, minimum_ratio_type = "min", minim
 
 In the resulting curated table, OTUs assigned to the same taxon were finally merged and their reads were summed, using the aggregate function in R. OTUs with multi-hits were manually assigned to OTUs with the same taxonomic assignment selected by LULU.
 
-## Decontamination with microDecon
+## IV. Decontamination with microDecon
 For more details on microDecon, see the original documentation here https://github.com/donaldtmcknight/microDecon.
 
 We converted our manually curated table from LULU into the format requested by microDecon. Default options were applied. 
@@ -218,5 +219,5 @@ We converted our manually curated table from LULU into the format requested by m
 decontaminated_default <- decon(data = microDecon_table, numb.blanks = 7, numb.ind = c(6,6,6,6,6,6,1), taxa = T)
 ```
 
-## Final curation 
+## V. Final curation 
 The replicates from the same site were then summed to obtain a single site-specific taxonomic list. Non-target species (humans and livestock) and possible contaminations were discarded. Sequences with unknown species assignments were annotated to the genus and the species was recorded as “sp.”. A threshold of >10 reads was set to declare a species as present in the watercourse.
