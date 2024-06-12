@@ -17,19 +17,15 @@ VI. Final curation <br />
 ## I. Introduction
 We used a multi-marker approach with Vert01 (Riaz et al., 2011) and Tele02 (Taberlet et al., 2018) 12S markers. The following workflow highlights the steps used during the analysis of the Vert01 dataset. We slightly changed parameters when working with Tele02, according to the marker's characteristics. 
 
-The following figure summarize the workflow:<br />
-![immagine](https://github.com/giorgiastaffoni/STREAM/assets/158456019/41cb3cf0-da2e-441f-8f94-1898e9100313)
-![immagine](https://github.com/giorgiastaffoni/STREAM/assets/158456019/41cb3cf0-da2e-441f-8f94-1898e9100313)![pergithub](https://github.com/giorgiastaffoni/STREAM/assets/158456019/874c3fe1-7d9a-47ad-9cd2-3da2da8521ae)
-![pergithub](https://github.com/giorgiastaffoni/STREAM/assets/158456019/874c3fe1-7d9a-47ad-9cd2-3da2da8521ae)
-
-
-
 Follow the instructions on the official documentation to install 
 - CRABS (https://github.com/gjeunen/reference_database_creator)
 - Barque (https://github.com/enormandeau/barque)
 - LULU (https://github.com/tobiasgf/lulu)
 - microDecon (https://github.com/donaldtmcknight/microDecon)
 and their dependencies.
+
+The following figure summarize the workflow:<br />
+![immagine](https://github.com/giorgiastaffoni/STREAM/assets/158456019/41cb3cf0-da2e-441f-8f94-1898e9100313)
 
 ## Reference database creation with CRABS
 For more details on CRABS, see the original documentation here https://github.com/gjeunen/reference_database_creator.
