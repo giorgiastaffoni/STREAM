@@ -209,7 +209,9 @@ As LULU was developed for ITS marker and the 12S barcode region presents lower v
 curated_result_mm87 <- lulu(otutab, matchlist, minimum_ratio_type = "min", minimum_ratio = 1, minimum_match = 87, minimum_relative_cooccurence = 0.95)
 ```
 
-In the resulting curated table, OTUs assigned to the same taxon were finally merged and their reads were summed, using the aggregate function in R. OTUs with multi-hits were manually assigned to OTUs with the same taxonomic assignment selected by LULU.
+In the resulting curated table
+- OTUs assigned to the same taxon were finally merged and their reads were summed, using the aggregate function in R.
+- OTUs with multi-hits were manually assigned to OTUs with the same taxonomic assignment selected by LULU.
 
 ## IV. Decontamination with microDecon
 For more details on microDecon, see the original documentation here https://github.com/donaldtmcknight/microDecon.
