@@ -117,7 +117,7 @@ Before starting to use Barque, please read the official documentation here https
 
 #### Data requirement
 - Input Fastq files.
-  The dataset used for this study contained forward and reverse reads from two 12S mitochondrial gene fragments of vertebrates and teleost species. Raw sequence reads were demultiplexed with bcl2fastq version 2.20 (Illumina) and FastQC was used to check read quality.
+  The dataset used for this study contained forward and reverse reads from two 12S mitochondrial gene fragments of vertebrates species. Raw sequence reads were demultiplexed with bcl2fastq version 2.20 (Illumina) and FastQC was used to check read quality.
 - Reference database converted into a Barque-friendly format
 
 To work with OTUs, two runs must be performed. The first one is used to refine the database and generate denoised OTUs, along with their taxonomic assignment. In the second one, the OTUs and their taxonomic assignment are used as a database themselves to find read counts per sample.
