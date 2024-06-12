@@ -18,7 +18,11 @@ VI. Final curation <br />
 We used a multi-marker approach with Vert01 (Riaz et al., 2011) and Tele02 (Taberlet et al., 2018) 12S markers. The following workflow highlights the steps used during the analysis of the Vert01 dataset. We slightly changed parameters when working with Tele02, according to the marker's characteristics. 
 
 The following figure summarize the workflow:<br />
-![Image of the workflow]
+![immagine](https://github.com/giorgiastaffoni/STREAM/assets/158456019/41cb3cf0-da2e-441f-8f94-1898e9100313)
+![immagine](https://github.com/giorgiastaffoni/STREAM/assets/158456019/41cb3cf0-da2e-441f-8f94-1898e9100313)![pergithub](https://github.com/giorgiastaffoni/STREAM/assets/158456019/874c3fe1-7d9a-47ad-9cd2-3da2da8521ae)
+![pergithub](https://github.com/giorgiastaffoni/STREAM/assets/158456019/874c3fe1-7d9a-47ad-9cd2-3da2da8521ae)
+
+
 
 Follow the instructions on the official documentation to install 
 - CRABS (https://github.com/gjeunen/reference_database_creator)
